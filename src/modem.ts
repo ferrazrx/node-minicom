@@ -57,12 +57,15 @@ export class Modem extends EventEmitter {
 
   async sendAt(command: string, back: string, timeout: number) {
     this.GPIO.powerOn();
-    this.serialPort.write(btoa(command + "\r\n"), (error) => {
+    const encodedCommand = this.formatCmd(command);
+    console.log("RUNNING: ", encodedCommand);
+    this.serialPort.write(encodedCommand, (error) => {
       if (error) {
         console.error(error);
       }
+      console.log("SUCCESS!");
     });
-    await sleep(timeout);
+    await sleep(30 * 1000);
     this.GPIO.powerDown();
   }
 

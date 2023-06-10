@@ -15,7 +15,6 @@ export class InternalPort {
   ) {}
 
   callPhoneNumber() {
-    console.log(this.phone);
     const back = "OK";
     const cmd = `ATD${this.phone};`;
     const timeout = 1000;
@@ -67,7 +66,7 @@ export default class Minicom {
         modem.on("data", success);
         return this.activePorts[path];
       } else {
-        console.log("Failed to setup port: ", path);
+        console.error("Failed to setup port: ", path);
         throw new Error("Failed to setup port: " + path);
       }
     } else {
@@ -84,7 +83,7 @@ export default class Minicom {
   defaultErrorHandler(obj) {
     const errorPorts = [];
 
-    console.log("Index default error handler: ", obj.error);
+    console.error("Index default error handler: ", obj.error);
 
     // errorPorts.push(obj.port);
   }
