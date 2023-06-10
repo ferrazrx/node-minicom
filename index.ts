@@ -1,6 +1,6 @@
 import { Modem } from "./src/modem";
 
-type Port = Omit<InternalPort, "modem">;
+type Port = Omit<InternalPort, "modem" | "callPhoneNumber">;
 type Ports = {
   [path: string]: InternalPort;
 };

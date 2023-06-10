@@ -42,4 +42,4 @@ const port = minicom.addPort({
   phone: "19022203567",
 });
 
-port.callPhone();
+port.callPhoneNumber();
