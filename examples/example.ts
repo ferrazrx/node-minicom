@@ -43,7 +43,7 @@ const port = minicom.addPort({
 });
 
 const call = async () => {
-  await port
+  port
     .callPhoneNumber()
     .then((e) => {
       console.log("HERE", e);
