@@ -35,8 +35,8 @@ export class InternalPort {
             .sendAt('AT+CMGS="' + this.phone + '"', 1000)
             .then((result) => {
               if (result) {
-                this.modem.writeRaw("^z");
-                this.modem.writeRaw(textMessage + "\r\n");
+                this.modem.writeRaw("");
+                this.modem.writeRaw(textMessage);
                 this.modem.writeRaw("\x1A");
                 this.modem.writeRaw("^z");
               }
