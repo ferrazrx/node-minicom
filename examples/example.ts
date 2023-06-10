@@ -43,18 +43,19 @@ const port = minicom.addPort({
 });
 
 const call = async () => {
-  port
-    .callPhoneNumber()
-    .then((e) => {
-      if (e) {
-        console.log("HERE: MESSAGE RECEIVED!");
-        port.modem.on("call", (data) => console.log("HERE 1", data));
-        port.modem.on("data", (data) => console.log("HERE 2", data));
-      }
-    })
-    .catch((e) => {
-      console.log("ERROR HERE");
-    });
+  port.sendShortMessage("test test");
+  //   port
+  //     .callPhoneNumber()
+  //     .then((e) => {
+  //       if (e) {
+  //         console.log("HERE: MESSAGE RECEIVED!");
+  //         port.modem.on("call", (data) => console.log("HERE 1", data));
+  //         port.modem.on("data", (data) => console.log("HERE 2", data));
+  //       }
+  //     })
+  //     .catch((e) => {
+  //       console.log("ERROR HERE");
+  //     });
 };
 
 call();
