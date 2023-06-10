@@ -70,7 +70,7 @@ export class Modem extends EventEmitter {
     });
   }
 
-  async writeRaw(buffer: Buffer) {
+  async writeRaw(buffer: string) {
     // this.activeCmd = (typeof buf === 'string') ? buf : (buf === undefined) ? '' : buf.toString();
     // this.state.previous = this.state.current;
     // this.state.current = 'WRITTING';
