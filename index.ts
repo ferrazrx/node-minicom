@@ -36,7 +36,7 @@ export class InternalPort {
             .then((result) => {
               if (result) {
                 this.modem.writeRaw(Buffer.from(textMessage, "utf-8"));
-                this.modem.writeRaw(Buffer.from("0x1A", "hex"));
+                this.modem.writeRaw(Buffer.from("x1A", "utf-8"));
               }
             });
         }
