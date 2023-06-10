@@ -131,33 +131,7 @@ export class Modem extends EventEmitter {
   errorHandler(path, err: unknown) {
     console.log("Modem error: ", err);
     const e = new Error(path + " has failed to load: " + err);
-    //@ts-ignore
     this.emit("error", { error: e, path });
-  }
-
-  init(initStr) {
-    // const i = this.formatInit(initStr);
-    // console.log("Init string: ", i);
-    // this.writeRaw(i);
-    // return this;
-  }
-
-  formatInit(init) {
-    // let str = "";
-    // const c = cmd.INIT;
-    // if (typeof init === "string") str = this.formatCmd(init);
-    // else {
-    //   init = init || {};
-    //   Object.assign(c, init);
-    //   for (x in c) {
-    //     if (x.match(/^S/)) {
-    //       str += x + "=" + c[x] + " ";
-    //     } else {
-    //       str += x + c[x] + " ";
-    //     }
-    //   }
-    // }
-    // return this.formatCmd(str);
   }
 
   handleState(state, cmd, code, data) {

@@ -23,7 +23,25 @@ export class InternalPort {
     return result;
   }
 
-  async sendShortMessage(textMessage: string) {
+  //TODO:
+  // def ReceiveShortMessage():
+  // 	rec_buff = ''
+  // 	console.log('Setting SMS mode...')
+  // 	send_at('AT+CMGF=1','OK',1)
+  // 	send_at('AT+CPMS=\"SM\",\"SM\",\"SM\"', 'OK', 1)
+  // 	answer = send_at('AT+CMGR=1','+CMGR:',2)
+  // 	if 1 == answer:
+  // 		answer = 0
+  // 		if 'OK' in rec_buff:
+  // 			answer = 1
+  // 			console.log(rec_buff)
+  // 	else:
+  // 		console.log('error%d'%answer)
+  // 		return False
+  // 	return True
+  // }
+
+  async sendShortMessage(textMessage: string): Promise<boolean> {
     console.log("Setting SMS mode...");
 
     const result = await this.modem
@@ -31,7 +49,7 @@ export class InternalPort {
       .then(async (result) => {
         if (result) {
           console.log("Sending Short Message...");
-          await this.modem
+          return await this.modem
             .sendAt('AT+CMGS="' + this.phone + '"', 1000)
             .then((result) => {
               if (result) {
@@ -39,29 +57,16 @@ export class InternalPort {
                 this.modem.writeRaw(textMessage);
                 this.modem.writeRaw("\x1A");
                 this.modem.writeRaw("^z");
+                return result;
               }
+              return false;
             });
         }
+        return false;
       });
+    return result;
   }
 }
-
-// def ReceiveShortMessage():
-// 	rec_buff = ''
-// 	console.log('Setting SMS mode...')
-// 	send_at('AT+CMGF=1','OK',1)
-// 	send_at('AT+CPMS=\"SM\",\"SM\",\"SM\"', 'OK', 1)
-// 	answer = send_at('AT+CMGR=1','+CMGR:',2)
-// 	if 1 == answer:
-// 		answer = 0
-// 		if 'OK' in rec_buff:
-// 			answer = 1
-// 			console.log(rec_buff)
-// 	else:
-// 		console.log('error%d'%answer)
-// 		return False
-// 	return True
-// }
 
 export default class Minicom {
   activePorts: Ports = {};
@@ -125,6 +130,7 @@ export default class Minicom {
 
     console.error("Index default error handler: ", obj.error);
 
+    // TODO:
     // errorPorts.push(obj.port);
   }
 }
