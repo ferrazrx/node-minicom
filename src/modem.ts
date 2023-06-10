@@ -21,9 +21,6 @@ export class Modem extends EventEmitter {
   writeable: boolean = false;
   readable: boolean = false;
 
-  private activeCmd = null;
-  private activeResp = null;
-
   constructor(opts: serialPort.SerialPortOpenOptions<AutoDetectTypes>) {
     super();
     Stream.Stream.call(this);
@@ -65,16 +62,29 @@ export class Modem extends EventEmitter {
           console.error(error);
           reject(false);
         }
-        console.log("SUCCESS!");
+        console.log("MESSAGE RECEIVED!");
         resolve(true);
       });
-      await await sleep(30 * 1000);
+      await await sleep(timeout);
       this.GPIO.powerDown();
     });
   }
 
-  dataHandler(path: string, data: Buffer) {
-    console.log(path, data.toString());
+  async writeRaw(buf) {
+    // this.activeCmd = (typeof buf === 'string') ? buf : (buf === undefined) ? '' : buf.toString();
+    // this.state.previous = this.state.current;
+    // this.state.current = 'WRITTING';
+    if (Buffer.isBuffer(buf)) this.serialPort.write(buf);
+    else if (typeof buf === "string") {
+      buf = this.formatCmd(buf);
+      this.serialPort.write(buf);
+    }
+    return this;
+  }
+
+  dataHandler(path: string, data: Buffer, a, b, c) {
+    console.log(a, b, c, data.toString());
+
     // const ret = this.handleState(
     //   this.state,
     //   this.activeCmd,
@@ -127,19 +137,6 @@ export class Modem extends EventEmitter {
     const i = this.formatInit(initStr);
     console.log("Init string: ", i);
     this.writeRaw(i);
-    return this;
-  }
-
-  writeRaw(buf) {
-    this.activeCmd =
-      typeof buf === "string" ? buf : buf === undefined ? "" : buf.toString();
-    this.state.previous = this.state.current;
-    this.state.current = "WRITTING";
-    if (Buffer.isBuffer(buf)) this.serialPort.write(buf);
-    else if (typeof buf === "string") {
-      buf = this.formatCmd(buf);
-      this.serialPort.write(buf);
-    }
     return this;
   }
 
