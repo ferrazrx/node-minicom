@@ -10,7 +10,8 @@
     },
     "scripts": {
         "build": "npx tsc",
-        "start": "node dist/app.js"
+        "start": "node dist/app.js",
+        "example": "ts-node examples/example.ts" 
     },
     "engine": "node 0.8",
     "devDependencies": {
