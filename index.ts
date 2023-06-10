@@ -14,12 +14,10 @@ export class InternalPort {
     public type?: string
   ) {}
 
-  callPhoneNumber() {
-    const back = "OK";
+  async callPhoneNumber(timeout: number = 30 * 1000) {
     const cmd = `ATD${this.phone};`;
-    const timeout = 1000;
-
-    this.modem.sendAt(cmd, back, timeout);
+    const result = await this.modem.sendAt(cmd, timeout);
+    return result;
   }
 }
 

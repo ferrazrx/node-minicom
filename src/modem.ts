@@ -55,28 +55,32 @@ export class Modem extends EventEmitter {
     return ret;
   }
 
-  async sendAt(command: string, back: string, timeout: number) {
-    this.GPIO.powerOn();
-    const encodedCommand = this.formatCmd(command);
-    console.log("RUNNING: ", encodedCommand);
-    this.serialPort.write(encodedCommand, (error) => {
-      if (error) {
-        console.error(error);
-      }
-      console.log("SUCCESS!");
+  async sendAt(command: string, timeout: number) {
+    return new Promise<boolean>(async (resolve, reject) => {
+      await this.GPIO.powerOn();
+      const encodedCommand = this.formatCmd(command);
+      console.log("RUNNING: ", encodedCommand);
+      this.serialPort.write(encodedCommand, (error) => {
+        if (error) {
+          console.error(error);
+          reject(false);
+        }
+        console.log("SUCCESS!");
+        resolve(true);
+      });
+      await await sleep(30 * 1000);
+      this.GPIO.powerDown();
     });
-    await sleep(30 * 1000);
-    this.GPIO.powerDown();
   }
 
   dataHandler(path, data) {
-    console.log("call handleState");
-    const ret = this.handleState(
-      this.state,
-      this.activeCmd,
-      data.code,
-      data.data
-    );
+    console.log(path, data);
+    // const ret = this.handleState(
+    //   this.state,
+    //   this.activeCmd,
+    //   data.code,
+    //   data.data
+    // );
     console.log("Modem data: ", data);
     /*  if (data.code) {
     if (data.data.indexOf(this.activeCmd) === -1) data.data.unshift(this.activeCmd);
@@ -85,15 +89,15 @@ export class Modem extends EventEmitter {
 */
 
     console.log("ret");
-    if (ret) {
-      //@ts-ignore
-      ret.data.path = path;
-      //@ts-ignore
-      ret.data.state = ret.state.current;
-      if (ret.state.current.match(/^(CALL|ANSWER|HANGUP)/i))
-        this.emit("call", ret.data);
-      else this.emit("data", ret.data);
-    }
+    // if (ret) {
+    //   //@ts-ignore
+    //   ret.data.path = path;
+    //   //@ts-ignore
+    //   ret.data.state = ret.state.current;
+    //   if (ret.state.current.match(/^(CALL|ANSWER|HANGUP)/i))
+    //     this.emit("call", ret.data);
+    //   else this.emit("data", ret.data);
+    // }
   }
 
   write(data) {
