@@ -58,6 +58,7 @@ export default class Minicom {
         };
         const callPhone = this.callPhoneNumber.bind(port);
 
+        console.log(port);
         this.activePorts[path] = {
           ...port,
           callPhone,
@@ -89,6 +90,7 @@ export default class Minicom {
   }
 
   callPhoneNumber(port: InternalPort) {
+    console.log(port);
     const back = "OK";
     const cmd = `ATD${port.phone};`;
     const timeout = 1000;
