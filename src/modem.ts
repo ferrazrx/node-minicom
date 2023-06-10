@@ -70,15 +70,12 @@ export class Modem extends EventEmitter {
     });
   }
 
-  async writeRaw(buf) {
+  async writeRaw(buffer: Buffer) {
     // this.activeCmd = (typeof buf === 'string') ? buf : (buf === undefined) ? '' : buf.toString();
     // this.state.previous = this.state.current;
     // this.state.current = 'WRITTING';
-    if (Buffer.isBuffer(buf)) this.serialPort.write(buf);
-    else if (typeof buf === "string") {
-      buf = this.formatCmd(buf);
-      this.serialPort.write(buf);
-    }
+    this.serialPort.write(buffer);
+
     return this;
   }
 
@@ -134,10 +131,10 @@ export class Modem extends EventEmitter {
   }
 
   init(initStr) {
-    const i = this.formatInit(initStr);
-    console.log("Init string: ", i);
-    this.writeRaw(i);
-    return this;
+    // const i = this.formatInit(initStr);
+    // console.log("Init string: ", i);
+    // this.writeRaw(i);
+    // return this;
   }
 
   formatInit(init) {
