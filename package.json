@@ -1,10 +1,19 @@
 {
-    "name": "node-minicom",
-    "author": "roy hasson",
+    "name": "node-minicom-raspberry-pi",
+    "author": "Roy Hasson & Rafael Ferraz",
     "version": "0.0.1",
     "private": false,
     "dependencies": {
-      "serialport": "1.0.8"
+        "rpi-gpio": "^2.1.7",
+        "serialport": "11.0.0"
     },
-    "engine": "node 0.8"
+    "scripts": {
+        "build": "npx tsc",
+        "start": "node dist/app.js"
+    },
+    "engine": "node 0.8",
+    "devDependencies": {
+        "@types/node": "^20.2.6",
+        "ts-node": "^10.9.1"
+    }
 }
