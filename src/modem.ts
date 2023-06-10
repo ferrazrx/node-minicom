@@ -10,7 +10,7 @@ const Serial = serialPort.SerialPort;
 export class Modem extends EventEmitter {
   static list = Serial.list;
   public serialPort: serialPort.SerialPort<AutoDetectTypes>;
-
+  public activeCommand: string = "";
   private GPIO: GPIOManager;
 
   private state = {
@@ -58,6 +58,7 @@ export class Modem extends EventEmitter {
       const encodedCommand = this.formatCmd(command);
       console.log("RUNNING: ", encodedCommand);
       this.serialPort.write(encodedCommand, (error) => {
+        this.activeCommand = encodedCommand;
         if (error) {
           console.error(error);
           reject(false);
@@ -70,24 +71,25 @@ export class Modem extends EventEmitter {
     });
   }
 
-  async writeRaw(buffer: string) {
-    // this.activeCmd = (typeof buf === 'string') ? buf : (buf === undefined) ? '' : buf.toString();
-    // this.state.previous = this.state.current;
-    // this.state.current = 'WRITTING';
-    this.serialPort.write(buffer);
+  async writeRaw(command: string) {
+    this.activeCommand = command;
+    this.state.previous = this.state.current;
+    this.state.current = "WRITTING";
+    this.serialPort.write(command);
 
     return this;
   }
 
-  dataHandler(path: string, data: Buffer, a, b, c) {
-    console.log(a, b, c, data.toString());
+  dataHandler(path: string, data: Buffer) {
+    console.log(path, data.toString());
 
-    // const ret = this.handleState(
-    //   this.state,
-    //   this.activeCmd,
-    //   data.code,
-    //   data.data
-    // );
+    const ret = this.handleState(
+      this.state,
+      this.activeCommand,
+      data.toString(),
+      data.toString()
+    );
+    console.log(ret);
     /*  if (data.code) {
     if (data.data.indexOf(this.activeCmd) === -1) data.data.unshift(this.activeCmd);
     this.emit('data', {data:data, port: port});
@@ -168,7 +170,7 @@ export class Modem extends EventEmitter {
       state.current = "DATA_RECEIVING";
       return { state: state, data: obj };
     } else if (code && cmd) {
-      if (cmd.match(/^ATDT/i)) {
+      if (cmd.match(/^ATD/i)) {
         switch (code) {
           case "OK":
             state.current = "CALL_CALLING";
