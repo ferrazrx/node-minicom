@@ -1,17 +1,28 @@
-import { SerialPort } from "serialport";
 import { Modem } from "./src/modem";
 
-type InternalPort = Port & { modem: SerialPort; callPhone: () => void };
+type Port = Omit<InternalPort, "modem">;
 type Ports = {
   [path: string]: InternalPort;
 };
 
-export type Port = {
-  baudRate: number;
-  phone: string;
-  path: string;
-  type?: string;
-};
+export class InternalPort {
+  constructor(
+    public path: string,
+    public baudRate: number,
+    public phone: string,
+    public modem: Modem,
+    public type?: string
+  ) {}
+
+  callPhoneNumber() {
+    console.log(this.phone);
+    const back = "OK";
+    const cmd = `ATD${this.phone};`;
+    const timeout = 1000;
+
+    this.modem.sendAt(cmd, back, timeout);
+  }
+}
 
 export default class Minicom {
   activePorts: Ports = {};
@@ -49,20 +60,9 @@ export default class Minicom {
     if (path) {
       const modem = new Modem({ path, baudRate });
       if (modem) {
-        const port = {
-          modem: modem.serialPort,
-          phone,
-          baudRate,
-          path,
-          type,
-        };
-        const callPhone = () => this.callPhoneNumber(port);
+        const port = new InternalPort(path, baudRate, phone, modem, type);
 
-        console.log(port);
-        this.activePorts[path] = {
-          ...port,
-          callPhone,
-        };
+        this.activePorts[path] = port;
         modem.on("error", error);
         modem.on("data", success);
         return this.activePorts[path];
@@ -87,14 +87,5 @@ export default class Minicom {
     console.log("Index default error handler: ", obj.error);
 
     // errorPorts.push(obj.port);
-  }
-
-  callPhoneNumber(port: Port) {
-    console.log(port);
-    const back = "OK";
-    const cmd = `ATD${port.phone};`;
-    const timeout = 1000;
-
-    console.log(cmd);
   }
 }
