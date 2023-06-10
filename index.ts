@@ -56,7 +56,7 @@ export default class Minicom {
           path,
           type,
         };
-        const callPhone = this.callPhoneNumber.bind(port);
+        const callPhone = this.callPhoneNumber.call(port);
 
         console.log(port);
         this.activePorts[path] = {
