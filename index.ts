@@ -56,7 +56,7 @@ export default class Minicom {
           path,
           type,
         };
-        const callPhone = this.callPhoneNumber.call(port);
+        const callPhone = () => this.callPhoneNumber(port);
 
         console.log(port);
         this.activePorts[path] = {
@@ -89,7 +89,7 @@ export default class Minicom {
     // errorPorts.push(obj.port);
   }
 
-  callPhoneNumber(port: InternalPort) {
+  callPhoneNumber(port: Port) {
     console.log(port);
     const back = "OK";
     const cmd = `ATD${port.phone};`;
