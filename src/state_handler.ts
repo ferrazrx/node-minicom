@@ -9,6 +9,7 @@
  */
 
 export const handleState = function (state, cmd, code, data) {
+  console.log(state, cmd, code, data);
   var obj = {
     cmd: cmd,
     code: code,

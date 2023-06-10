@@ -1,5 +1,4 @@
 import * as serialPort from "serialport";
-import { handleState } from "./state_handler";
 import { EventEmitter } from "events";
 import Stream from "stream";
 import { AutoDetectTypes } from "@serialport/bindings-cpp";
@@ -23,7 +22,6 @@ export class Modem extends EventEmitter {
   constructor(opts: serialPort.SerialPortOpenOptions<AutoDetectTypes>) {
     super();
     Stream.Stream.call(this);
-
     this.serialPort = this.setupPort(opts);
   }
 
@@ -32,6 +30,7 @@ export class Modem extends EventEmitter {
     this.state.initial = "CREATED";
     this.writeable = true;
     this.readable = true;
+    console.log("setupPort");
     serialPort.on("data", this.dataHandler.bind(this, opts.path));
     serialPort.on("error", this.errorHandler.bind(this, opts.path));
     return serialPort;
@@ -50,7 +49,13 @@ export class Modem extends EventEmitter {
   }
 
   dataHandler(path, data) {
-    const ret = handleState(this.state, this.activeCmd, data.code, data.data);
+    console.log("call handleState");
+    const ret = this.handleState(
+      this.state,
+      this.activeCmd,
+      data.code,
+      data.data
+    );
     console.log("Modem data: ", data);
     /*  if (data.code) {
     if (data.data.indexOf(this.activeCmd) === -1) data.data.unshift(this.activeCmd);
@@ -58,6 +63,7 @@ export class Modem extends EventEmitter {
   }
 */
 
+    console.log("ret");
     if (ret) {
       //@ts-ignore
       ret.data.path = path;
@@ -141,5 +147,68 @@ export class Modem extends EventEmitter {
     //   }
     // }
     // return this.formatCmd(str);
+  }
+
+  handleState(state, cmd, code, data) {
+    console.log(state, cmd, code, data);
+    var obj = {
+      cmd: cmd,
+      code: code,
+      data: data,
+    };
+
+    state.previous = state.current;
+    if (!code && data.length) {
+      state.current = "DATA_RECEIVING";
+      return { state: state, data: obj };
+    } else if (code && cmd) {
+      if (cmd.match(/^ATDT/i)) {
+        switch (code) {
+          case "OK":
+            state.current = "CALL_CALLING";
+            break;
+          case "RING":
+            state.current = "CALL_RINGING";
+            break;
+          case "CONNECT":
+            state.current = "CALL_CONNECTED";
+            break;
+          case "ERROR":
+            state.current = "CALL_FAILED";
+            break;
+          case "NO CARRIER":
+            state.current = "CALL_NO_LINE";
+            break;
+          case "BUSY":
+            state.current = "CALL_BUSY";
+            break;
+          default:
+            state.current = "CALL_UNKNOWN";
+        }
+      } else if (cmd.match(/^ATA/i)) {
+        switch (code) {
+          case "OK":
+            state.current = "ANSWER_SUCCESS";
+            break;
+          case "ERROR":
+            state.current = "ANSWER_FAILED";
+            break;
+          default:
+            state.current = "ANSWER_UNKNOWN";
+        }
+      } else if (cmd.match(/^ATH/i)) {
+        switch (code) {
+          case "OK":
+            state.current = "HANGUP_SUCCESS";
+            break;
+          case "ERROR":
+            state.current = "HANGUP_FAILED";
+            break;
+          default:
+            state.current = "HANGUP_UNKNOWN";
+        }
+      }
+      return { state: state, data: obj };
+    }
   }
 }
