@@ -49,13 +49,18 @@ export default class Minicom {
     if (path) {
       const modem = new Modem({ path, baudRate });
       if (modem) {
-        this.activePorts[path] = {
+        const port = {
           modem: modem.serialPort,
           phone,
           baudRate,
           path,
-          callPhone: this.callPhoneNumber.bind(this),
           type,
+        };
+        const callPhone = this.callPhoneNumber.bind(port);
+
+        this.activePorts[path] = {
+          ...port,
+          callPhone,
         };
         modem.on("error", error);
         modem.on("data", success);
