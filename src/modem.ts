@@ -73,22 +73,19 @@ export class Modem extends EventEmitter {
     });
   }
 
-  dataHandler(path, data) {
-    console.log(path, data);
+  dataHandler(path: string, data: Buffer) {
+    console.log(path, data.toString());
     // const ret = this.handleState(
     //   this.state,
     //   this.activeCmd,
     //   data.code,
     //   data.data
     // );
-    console.log("Modem data: ", data);
     /*  if (data.code) {
     if (data.data.indexOf(this.activeCmd) === -1) data.data.unshift(this.activeCmd);
     this.emit('data', {data:data, port: port});
   }
 */
-
-    console.log("ret");
     // if (ret) {
     //   //@ts-ignore
     //   ret.data.path = path;
@@ -145,15 +142,6 @@ export class Modem extends EventEmitter {
     }
     return this;
   }
-
-  // dial(dest) {
-  //   if (typeof dest === "string") return this.writeRaw("ATDT" + dest);
-  //   else {
-  //     src.writeRaw("ATDT" + dest.phone);
-  //     //dest.modem.pipe(src);
-  //   }
-  //   return this;
-  // }
 
   formatInit(init) {
     // let str = "";
