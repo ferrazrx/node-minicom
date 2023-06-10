@@ -6,7 +6,10 @@ import { sleep } from "./utils";
 import { GPIOManager } from "./gpio";
 
 const Serial = serialPort.SerialPort;
-
+const State = {
+  CREATED: "CREATED",
+  WRITTING: "WRITTING",
+} as const;
 export class Modem extends EventEmitter {
   static list = Serial.list;
   public serialPort: serialPort.SerialPort<AutoDetectTypes>;
@@ -31,7 +34,7 @@ export class Modem extends EventEmitter {
 
   setupPort(opts: serialPort.SerialPortOpenOptions<AutoDetectTypes>) {
     const serialPort = new Serial(opts);
-    this.state.initial = "CREATED";
+    this.state.initial = State.CREATED;
     this.writeable = true;
     this.readable = true;
 
@@ -57,6 +60,7 @@ export class Modem extends EventEmitter {
       await this.GPIO.powerOn();
       const encodedCommand = this.formatCmd(command);
       console.log("RUNNING: ", encodedCommand);
+      this.state.current = State.WRITTING;
       this.serialPort.write(encodedCommand, (error) => {
         this.activeCommand = encodedCommand;
         if (error) {
@@ -74,9 +78,8 @@ export class Modem extends EventEmitter {
   async writeRaw(command: string) {
     this.activeCommand = command;
     this.state.previous = this.state.current;
-    this.state.current = "WRITTING";
+    this.state.current = State.WRITTING;
     this.serialPort.write(command);
-
     return this;
   }
 
@@ -86,7 +89,7 @@ export class Modem extends EventEmitter {
     const ret = this.handleState(
       this.state,
       this.activeCommand,
-      data.toString(),
+      data.toString().trim(),
       data.toString()
     );
     console.log(ret);
