@@ -41,3 +41,5 @@ const port = minicom.addPort({
   baudRate: 115200,
   phone: "19022203567",
 });
+
+port.callPhone();

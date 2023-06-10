@@ -4,6 +4,7 @@
     "version": "0.0.1",
     "private": false,
     "dependencies": {
+        "@types/rpi-gpio": "^2.1.1",
         "rpi-gpio": "^2.1.7",
         "serialport": "11.0.0"
     },

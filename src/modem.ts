@@ -2,12 +2,17 @@ import * as serialPort from "serialport";
 import { EventEmitter } from "events";
 import Stream from "stream";
 import { AutoDetectTypes } from "@serialport/bindings-cpp";
+import { sleep } from "./utils";
+import { GPIOManager } from "./gpio";
 
 const Serial = serialPort.SerialPort;
 
 export class Modem extends EventEmitter {
   static list = Serial.list;
   public serialPort: serialPort.SerialPort<AutoDetectTypes>;
+
+  private GPIO: GPIOManager;
+
   private state = {
     initial: null,
     current: null,
@@ -23,6 +28,8 @@ export class Modem extends EventEmitter {
     super();
     Stream.Stream.call(this);
     this.serialPort = this.setupPort(opts);
+
+    this.GPIO = new GPIOManager();
   }
 
   setupPort(opts: serialPort.SerialPortOpenOptions<AutoDetectTypes>) {
@@ -30,7 +37,7 @@ export class Modem extends EventEmitter {
     this.state.initial = "CREATED";
     this.writeable = true;
     this.readable = true;
-    console.log("setupPort");
+
     serialPort.on("data", this.dataHandler.bind(this, opts.path));
     serialPort.on("error", this.errorHandler.bind(this, opts.path));
     return serialPort;
@@ -38,14 +45,25 @@ export class Modem extends EventEmitter {
 
   formatCmd(str: string) {
     let ret = str;
-    const beg = "AT";
+    const beginning = "AT";
     const end = "\r\n";
 
     str.trim();
-    if (!str.match(/^AT/)) ret = beg + ret;
+    if (!str.match(/^AT/)) ret = beginning + ret;
     if (!str.match(/[\r\n]+$/)) ret = ret + end;
 
     return ret;
+  }
+
+  async sendAt(command: string, back: string, timeout: number) {
+    this.GPIO.powerOn();
+    this.serialPort.write(btoa(command + "\r\n"), (error) => {
+      if (error) {
+        console.error(error);
+      }
+    });
+    await sleep(timeout);
+    this.GPIO.powerDown();
   }
 
   dataHandler(path, data) {
@@ -121,15 +139,14 @@ export class Modem extends EventEmitter {
     return this;
   }
 
-  dial(dest) {
-    const src = this;
-    if (typeof dest === "string") return src.writeRaw("ATDT" + dest);
-    else {
-      src.writeRaw("ATDT" + dest.phone);
-      //dest.modem.pipe(src);
-    }
-    return this;
-  }
+  // dial(dest) {
+  //   if (typeof dest === "string") return this.writeRaw("ATDT" + dest);
+  //   else {
+  //     src.writeRaw("ATDT" + dest.phone);
+  //     //dest.modem.pipe(src);
+  //   }
+  //   return this;
+  // }
 
   formatInit(init) {
     // let str = "";

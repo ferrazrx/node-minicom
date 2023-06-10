@@ -1,9 +1,9 @@
 import { SerialPort } from "serialport";
 import { Modem } from "./src/modem";
-import fs from "fs";
 
+type InternalPort = Port & { modem: SerialPort; callPhone: () => void };
 type Ports = {
-  [path: string]: Port & { modem: SerialPort };
+  [path: string]: InternalPort;
 };
 
 export type Port = {
@@ -25,11 +25,11 @@ export default class Minicom {
     }
   }
 
-  addPort = function (
+  addPort = (
     { path, baudRate, phone, type }: Port,
     success_cb?: () => void,
     error_cb?: () => void
-  ) {
+  ) => {
     // Return already active port if set the same path
     const keys = Object.keys(this.activePorts);
     if (keys.includes(path)) {
@@ -51,8 +51,10 @@ export default class Minicom {
       if (modem) {
         this.activePorts[path] = {
           modem: modem.serialPort,
-          phone: phone,
-          port: path,
+          phone,
+          baudRate,
+          path,
+          callPhone: this.callPhoneNumber.bind(this),
           type,
         };
         modem.on("error", error);
@@ -79,5 +81,13 @@ export default class Minicom {
     console.log("Index default error handler: ", obj.error);
 
     // errorPorts.push(obj.port);
+  }
+
+  callPhoneNumber(port: InternalPort) {
+    const back = "OK";
+    const cmd = `ATD${port.phone};`;
+    const timeout = 1000;
+
+    console.log(cmd);
   }
 }
