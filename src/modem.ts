@@ -2,8 +2,6 @@ import * as serialPort from "serialport";
 import { EventEmitter } from "events";
 import Stream from "stream";
 import { AutoDetectTypes } from "@serialport/bindings-cpp";
-// import { sleep } from "./utils";
-// import { GPIOManager } from "./gpio";
 
 const Serial = serialPort.SerialPort;
 const State = {
@@ -14,7 +12,6 @@ export class Modem extends EventEmitter {
   static list = Serial.list;
   public serialPort: serialPort.SerialPort<AutoDetectTypes>;
   public activeCommand: string = "";
-  // private GPIO: GPIOManager;
 
   private state = {
     initial: null,
@@ -28,8 +25,6 @@ export class Modem extends EventEmitter {
     super();
     Stream.Stream.call(this);
     this.serialPort = this.setupPort(opts);
-
-    // this.GPIO = new GPIOManager();
   }
 
   setupPort(opts: serialPort.SerialPortOpenOptions<AutoDetectTypes>) {
@@ -55,7 +50,7 @@ export class Modem extends EventEmitter {
     return ret;
   }
 
-  async sendAt(command: string, timeout: number) {
+  async sendAt(command: string) {
     return new Promise<boolean>(async (resolve, reject) => {
       // await this.GPIO.powerOn();
       const encodedCommand = this.formatCmd(command);
@@ -70,8 +65,6 @@ export class Modem extends EventEmitter {
         console.log("MESSAGE RECEIVED!");
         resolve(true);
       });
-      // await await sleep(timeout);
-      // this.GPIO.powerDown();
     });
   }
 
@@ -84,13 +77,13 @@ export class Modem extends EventEmitter {
   }
 
   dataHandler(path: string, data: Buffer) {
-    console.log(path, data.toString());
+    console.log(this.activeCommand, data.toString().trim());
 
     const ret = this.handleState(
       this.state,
       this.activeCommand,
       data.toString().trim(),
-      data.toString()
+      data.toString().trim()
     );
     console.log(ret);
     /*  if (data.code) {

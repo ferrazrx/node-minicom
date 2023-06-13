@@ -17,9 +17,9 @@ export class InternalPort {
     public type?: string
   ) {}
 
-  async callPhoneNumber(timeout: number = 30 * 1000) {
+  async callPhoneNumber() {
     const cmd = `ATD${this.phone};`;
-    const result = await this.modem.sendAt(cmd, timeout);
+    const result = await this.modem.sendAt(cmd);
     return result;
   }
 
@@ -42,29 +42,20 @@ export class InternalPort {
   // }
 
   async sendShortMessage(textMessage: string): Promise<boolean> {
-    console.log("Setting SMS mode...");
-
-    const result = await this.modem
-      .sendAt("AT+CMGF=1", 1000)
-      .then(async (result) => {
-        if (result) {
-          console.log("Sending Short Message...");
-          return await this.modem
-            .sendAt('AT+CMGS="' + this.phone + '"', 1000)
-            .then((result) => {
-              if (result) {
-                this.modem.writeRaw("");
-                this.modem.writeRaw(textMessage);
-                this.modem.writeRaw("\x1A");
-                this.modem.writeRaw("^z");
-                return result;
-              }
-              return false;
-            });
-        }
-        return false;
-      });
-    return result;
+    try{
+      console.log("Setting SMS mode...");
+      const result = await this.modem.sendAt("AT+CMGF=1");
+      console.log("Sending Short Message...");
+      await this.modem.sendAt('AT+CMGS="' + this.phone + '"')
+      this.modem.writeRaw("");
+      this.modem.writeRaw(textMessage);
+      this.modem.writeRaw("\x1A");
+      // this.modem.writeRaw("^z");
+      return true
+    }catch(e){
+      console.error(e)
+      return false;
+    }
   }
 }
 
