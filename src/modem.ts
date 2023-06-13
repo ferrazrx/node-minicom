@@ -11,8 +11,9 @@ const State = {
 } as const;
 
 const formatOutput = (string: string)=> {
-  return string.replace(/(\r\n|\n|\r)/gm, "")
+  return string.replace(/(\r\n|\n|\r|[0-9]|>)/gm, "")
 }
+
 export class Modem extends EventEmitter {
   static list = Serial.list;
   public serialPort: serialPort.SerialPort<AutoDetectTypes>;
