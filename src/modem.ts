@@ -80,6 +80,7 @@ export class Modem extends EventEmitter {
     );
     this.activeCommand = ''
     this.write(result);
+    this.serialPort.flush();
   }
 
   write(data) {
@@ -113,7 +114,7 @@ export class Modem extends EventEmitter {
     if (!code && !cmd) {
       state.current = "DATA_RECEIVING";
     } else if (code && cmd) {
-      if(cmd.match(/^AT+CMGF/i)){
+      if(cmd.match(/^AT\+CMGF/i)){
         switch (code) {
           case "OK":
             state.current = "MESSAGE_ACKNOWLEDGED";
