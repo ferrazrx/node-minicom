@@ -19,7 +19,7 @@ export class InternalPort {
 
   async callPhoneNumber() {
     const cmd = `ATD${this.phone};`;
-    const result = await this.modem.sendAt(cmd);
+    const result = await this.modem.writeRaw(cmd);
     return result;
   }
 
@@ -44,13 +44,12 @@ export class InternalPort {
   async sendShortMessage(textMessage: string): Promise<boolean> {
     try{
       console.log("Setting SMS mode...");
-      const result = await this.modem.sendAt("AT+CMGF=1");
+      await this.modem.writeRaw("AT+CMGF=1");
       console.log("Sending Short Message...");
-      await this.modem.sendAt('AT+CMGS="' + this.phone + '"')
+      await this.modem.writeRaw('AT+CMGS="' + this.phone + '"')
       this.modem.writeRaw("");
       this.modem.writeRaw(textMessage);
       this.modem.writeRaw("\x1A");
-      // this.modem.writeRaw("^z");
       return true
     }catch(e){
       console.error(e)

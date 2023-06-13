@@ -7,6 +7,7 @@ const Serial = serialPort.SerialPort;
 const State = {
   CREATED: "CREATED",
   WRITTING: "WRITTING",
+  IDLE: "IDLE",
 } as const;
 export class Modem extends EventEmitter {
   static list = Serial.list;
@@ -39,53 +40,40 @@ export class Modem extends EventEmitter {
   }
 
   formatCmd(str: string) {
-    let ret = str;
-    const beginning = "AT";
+    let result = str;
     const end = "\r\n";
-
     str.trim();
-    if (!str.match(/^AT/)) ret = beginning + ret;
-    if (!str.match(/[\r\n]+$/)) ret = ret + end;
-
-    return ret;
-  }
-
-  async sendAt(command: string) {
-    return new Promise<boolean>(async (resolve, reject) => {
-      // await this.GPIO.powerOn();
-      const encodedCommand = this.formatCmd(command);
-      console.log("RUNNING: ", encodedCommand);
-      this.state.current = State.WRITTING;
-      this.serialPort.write(encodedCommand, (error) => {
-        this.activeCommand = encodedCommand;
-        if (error) {
-          console.error(error);
-          reject(false);
-        }
-        console.log("MESSAGE RECEIVED!");
-        resolve(true);
-      });
-    });
+    if (!str.match(/[\r\n]+$/)) result = result + end;
+    return result;
   }
 
   async writeRaw(command: string) {
-    this.activeCommand = command;
+    return new Promise<boolean>(async (resolve, reject) => {
+    const formattedCommand = this.formatCmd(command);
+    this.activeCommand = formattedCommand;
     this.state.previous = this.state.current;
     this.state.current = State.WRITTING;
-    this.serialPort.write(command);
-    return this;
+    this.serialPort.write(formattedCommand, (error)=>{
+      this.state.current = State.IDLE;
+      if (error) {
+        console.error(error);
+        reject(false);
+      }
+      resolve(true);
+    });
+    })
   }
 
   dataHandler(path: string, data: Buffer) {
-    console.log(this.activeCommand, data.toString().trim());
+    console.log(this.activeCommand.trim(), data.toString().trim());
 
-    const ret = this.handleState(
+    const result = this.handleState(
       this.state,
-      this.activeCommand,
+      this.activeCommand.trim(),
       data.toString().trim(),
       data.toString().trim()
     );
-    console.log(ret);
+    console.log(result);
     /*  if (data.code) {
     if (data.data.indexOf(this.activeCmd) === -1) data.data.unshift(this.activeCmd);
     this.emit('data', {data:data, port: port});

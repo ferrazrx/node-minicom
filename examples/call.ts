@@ -13,7 +13,7 @@ const call = async () => {
     .callPhoneNumber()
     .then((e) => {
       if (e) {
-        console.log("HERE: MESSAGE RECEIVED!");
+        console.log("MESSAGE RECEIVED!");
         port.modem.on("call", (data) => console.log(data));
         port.modem.on("data", (data) => console.log(data));
       }
