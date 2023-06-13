@@ -44,13 +44,20 @@ export class InternalPort {
   async sendShortMessage(textMessage: string): Promise<boolean> {
     try{
       console.log("Setting SMS mode...");
-      await this.modem.writeRaw("AT+CMGF=1");
-      console.log("Sending Short Message...");
-      await this.modem.writeRaw('AT+CMGS="' + this.phone + '"')
-      this.modem.writeRaw("");
-      this.modem.writeRaw(textMessage);
-      this.modem.writeRaw("\x1A");
-      return true
+      
+      if(await this.modem.writeRaw("AT+CMGF=1")){
+        console.log("Sending Short Message...");
+        if(await this.modem.writeRaw('AT+CMGS="' + this.phone + '"')){
+          this.modem.writeRaw("");
+          this.modem.writeRaw(textMessage);
+          this.modem.writeRaw("\x1A");
+          return true
+        }else{
+          throw new Error('Sending +CMGS failed!')
+        }
+      }else{
+        throw new Error('Sending +CMGF failed!')
+      }
     }catch(e){
       console.error(e)
       return false;
