@@ -1,9 +1,9 @@
-import * as serialPort from "serialport";
+import {SerialPort, ReadlineParser, SerialPortOpenOptions} from "serialport";
 import { EventEmitter } from "events";
 import Stream from "stream";
 import { AutoDetectTypes } from "@serialport/bindings-cpp";
 
-const Serial = serialPort.SerialPort;
+const Serial = SerialPort;
 const State = {
   CREATED: "CREATED",
   WRITTING: "WRITTING",
@@ -16,7 +16,7 @@ const formatOutput = (string: string)=> {
 
 export class Modem extends EventEmitter {
   static list = Serial.list;
-  public serialPort: serialPort.SerialPort<AutoDetectTypes>;
+  public serialPort: SerialPort<AutoDetectTypes>;
   public activeCommand: string = "";
 
   private state = {
@@ -27,20 +27,21 @@ export class Modem extends EventEmitter {
   writeable: boolean = false;
   readable: boolean = false;
 
-  constructor(opts: serialPort.SerialPortOpenOptions<AutoDetectTypes>) {
+  constructor(opts: SerialPortOpenOptions<AutoDetectTypes>) {
     super();
     Stream.Stream.call(this);
     this.serialPort = this.setupPort(opts);
   }
 
-  setupPort(opts: serialPort.SerialPortOpenOptions<AutoDetectTypes>) {
+  setupPort(opts: SerialPortOpenOptions<AutoDetectTypes>) {
     const serialPort = new Serial(opts);
+    const parser = serialPort.pipe(new ReadlineParser())
     this.state.initial = State.CREATED;
     this.writeable = true;
     this.readable = true;
 
-    serialPort.on("data", this.dataHandler.bind(this));
-    serialPort.on("error", this.errorHandler.bind(this));
+    parser.on("data", this.dataHandler.bind(this));
+    parser.on("error", this.errorHandler.bind(this));
     return serialPort;
   }
 
@@ -72,15 +73,14 @@ export class Modem extends EventEmitter {
   }
 
   dataHandler(data: Buffer) {
-console.log("BUFFER", data.toString())
-    const result = this.handleState(
-      this.state,
-      formatOutput(this.activeCommand),
-      formatOutput(data.toString()),
-    );
-    this.activeCommand = ''
-    this.write(result);
-    this.serialPort.flush();
+console.log("BUFFER", data)
+    // const result = this.handleState(
+    //   this.state,
+    //   formatOutput(this.activeCommand),
+    //   formatOutput(data.toString()),
+    // );
+    // this.activeCommand = ''
+    // this.write(result);
   }
 
   write(data) {
