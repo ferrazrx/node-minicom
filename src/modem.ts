@@ -10,6 +10,10 @@ const State = {
   IDLE: "IDLE",
 } as const;
 
+const formatOutput = (string: string)=> {
+  return string.replace(/(\r\n|\n|\r|>)/gm, "").trim()
+}
+
 export class Modem extends EventEmitter {
   static list = Serial.list;
   public serialPort: SerialPort<AutoDetectTypes>;
@@ -68,11 +72,14 @@ export class Modem extends EventEmitter {
     })
   }
 
-  dataHandler(data: Buffer) {
+  dataHandler(buffer: string) {
+    const data = formatOutput(buffer)
 
+    if(!data || data === "") return;
+    console.log("DATA", data)
     const result = this.handleState(
       this.state,
-      this.activeCommand,
+      formatOutput(this.activeCommand),
       data,
     );
     this.activeCommand = ''
