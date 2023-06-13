@@ -57,7 +57,7 @@ export class Modem extends EventEmitter {
     return new Promise<boolean>(async (resolve, reject) => {
     const formattedCommand = shouldFormat ? this.formatCmd(command) : command;
     console.log("CMD::::", command)
-    this.activeCommand = command;
+    this.activeCommand += command;
     this.state.previous = this.state.current;
     this.state.current = State.WRITTING;
     this.serialPort.write(formattedCommand, (error)=>{
@@ -83,6 +83,7 @@ export class Modem extends EventEmitter {
       formatOutput(data.toString()),
       formatOutput(data.toString())
     );
+    this.activeCommand = ''
     console.log(result);
     /*  if (data.code) {
     if (data.data.indexOf(this.activeCmd) === -1) data.data.unshift(this.activeCmd);

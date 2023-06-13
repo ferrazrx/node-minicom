@@ -48,9 +48,9 @@ export class InternalPort {
       if(await this.modem.writeRaw("AT+CMGF=1")){
         console.log("Sending Short Message...");
         if(await this.modem.writeRaw('AT+CMGS="' + this.phone + '"')){
-          this.modem.writeRaw("");
+          this.modem.writeRaw("", false);
           this.modem.writeRaw(textMessage, false);
-          this.modem.writeRaw("\x1A");
+          this.modem.writeRaw("\x1A", false);
           return true
         }else{
           throw new Error('Sending +CMGS failed!')
