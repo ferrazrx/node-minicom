@@ -47,7 +47,7 @@ export class InternalPort {
       await this.modem.writeRaw("AT+CMGF=1");
       console.log("Sending Short Message...");
       await this.modem.writeRaw('AT+CMGS="' + this.phone + '"')
-      this.modem.writeRaw("", false);
+      this.modem.writeRaw("");
       this.modem.writeRaw(textMessage, false);
       this.modem.writeRaw("\x1A", false);
       return true
