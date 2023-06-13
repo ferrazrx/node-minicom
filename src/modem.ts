@@ -39,21 +39,12 @@ export class Modem extends EventEmitter {
     return serialPort;
   }
 
-  formatCmd(str: string) {
-    let result = str;
-    const end = "\r\n";
-    str.trim();
-    if (!str.match(/[\r\n]+$/)) result = result + end;
-    return result;
-  }
-
   async writeRaw(command: string) {
     return new Promise<boolean>(async (resolve, reject) => {
-    const formattedCommand = this.formatCmd(command);
-    this.activeCommand = formattedCommand;
+    this.activeCommand = command;
     this.state.previous = this.state.current;
     this.state.current = State.WRITTING;
-    this.serialPort.write(formattedCommand, (error)=>{
+    this.serialPort.write(command, (error)=>{
       this.state.current = State.IDLE;
       if (error) {
         console.error(error);
@@ -116,7 +107,6 @@ export class Modem extends EventEmitter {
   }
 
   handleState(state, cmd, code, data) {
-    console.log(state, cmd, code, data);
     var obj = {
       cmd: cmd,
       code: code,
