@@ -10,10 +10,6 @@ const State = {
   IDLE: "IDLE",
 } as const;
 
-const formatOutput = (string: string)=> {
-  return string.replace(/(\r\n|\n|\r|[0-9]|>|:)/gm, "").trim()
-}
-
 export class Modem extends EventEmitter {
   static list = Serial.list;
   public serialPort: SerialPort<AutoDetectTypes>;
@@ -73,14 +69,14 @@ export class Modem extends EventEmitter {
   }
 
   dataHandler(data: Buffer) {
-console.log("BUFFER", data)
-    // const result = this.handleState(
-    //   this.state,
-    //   formatOutput(this.activeCommand),
-    //   formatOutput(data.toString()),
-    // );
-    // this.activeCommand = ''
-    // this.write(result);
+
+    const result = this.handleState(
+      this.state,
+      this.activeCommand,
+      data,
+    );
+    this.activeCommand = ''
+    this.write(result);
   }
 
   write(data) {
