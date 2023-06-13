@@ -56,7 +56,6 @@ export class Modem extends EventEmitter {
 
     return new Promise<boolean>(async (resolve, reject) => {
     const formattedCommand = shouldFormat ? this.formatCmd(command) : command;
-    console.log("CMD::::", command)
     this.activeCommand += command;
     this.state.previous = this.state.current;
     this.state.current = State.WRITTING;
@@ -72,33 +71,15 @@ export class Modem extends EventEmitter {
     })
   }
 
-
-
   dataHandler(data: Buffer) {
-    console.log("FORMATED: ", formatOutput(this.activeCommand), formatOutput(data.toString()));
 
     const result = this.handleState(
       this.state,
       formatOutput(this.activeCommand),
       formatOutput(data.toString()),
-      formatOutput(data.toString())
     );
     this.activeCommand = ''
-    console.log(result);
-    /*  if (data.code) {
-    if (data.data.indexOf(this.activeCmd) === -1) data.data.unshift(this.activeCmd);
-    this.emit('data', {data:data, port: port});
-  }
-*/
-    // if (ret) {
-    //   //@ts-ignore
-    //   ret.data.path = path;
-    //   //@ts-ignore
-    //   ret.data.state = ret.state.current;
-    //   if (ret.state.current.match(/^(CALL|ANSWER|HANGUP)/i))
-    //     this.emit("call", ret.data);
-    //   else this.emit("data", ret.data);
-    // }
+    this.write(result);
   }
 
   write(data) {
