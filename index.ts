@@ -79,8 +79,7 @@ export default class Minicom {
 
   addPort = (
     { path, baudRate, phone, type }: Port,
-    success_cb?: () => void,
-    error_cb?: () => void
+ 
   ) => {
     // Return already active port if set the same path
     const keys = Object.keys(this.activePorts);
@@ -91,21 +90,12 @@ export default class Minicom {
       return this.activePorts[path];
     }
 
-    const success =
-      typeof success_cb === "function"
-        ? success_cb
-        : this.defaultSuccessHandler;
-    const error =
-      typeof error_cb === "function" ? error_cb : this.defaultErrorHandler;
-
     if (path) {
       const modem = new Modem({ path, baudRate });
       if (modem) {
         const port = new InternalPort(path, baudRate, phone, modem, type);
 
         this.activePorts[path] = port;
-        modem.on("error", error);
-        modem.on("data", success);
         return this.activePorts[path];
       } else {
         console.error("Failed to setup port: ", path);
@@ -117,17 +107,4 @@ export default class Minicom {
       );
     }
   };
-
-  defaultSuccessHandler(obj) {
-    console.log("Index default success handler: ", obj.data);
-  }
-
-  defaultErrorHandler(obj) {
-    const errorPorts = [];
-
-    console.error("Index default error handler: ", obj.error);
-
-    // TODO:
-    // errorPorts.push(obj.port);
-  }
 }

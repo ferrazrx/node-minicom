@@ -72,7 +72,7 @@ export class Modem extends EventEmitter {
   }
 
   dataHandler(data: Buffer) {
-
+console.log("BUFFER", data.toString())
     const result = this.handleState(
       this.state,
       formatOutput(this.activeCommand),
@@ -114,7 +114,7 @@ export class Modem extends EventEmitter {
     if (!code && !cmd) {
       state.current = "DATA_RECEIVING";
     } else if (code && cmd) {
-      if(cmd.match(/^AT\+CMGF/i)){
+      if(cmd.match(/^AT\+CMGF/)){
         switch (code) {
           case "OK":
             state.current = "MESSAGE_ACKNOWLEDGED";
@@ -125,7 +125,7 @@ export class Modem extends EventEmitter {
         }
       }
 
-      if(cmd.match(/^\+CMGS/i)){
+      if(cmd.match(/^\+CMGS/)){
         switch (code) {
           case "OK":
             state.current = "MESSAGE_SENT";
@@ -135,6 +135,7 @@ export class Modem extends EventEmitter {
             break
         }
       }
+
       if (cmd.match(/^ATD/i)) {
         switch (code) {
           case "OK":
