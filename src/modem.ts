@@ -2,8 +2,8 @@ import * as serialPort from "serialport";
 import { EventEmitter } from "events";
 import Stream from "stream";
 import { AutoDetectTypes } from "@serialport/bindings-cpp";
-import { sleep } from "./utils";
-import { GPIOManager } from "./gpio";
+// import { sleep } from "./utils";
+// import { GPIOManager } from "./gpio";
 
 const Serial = serialPort.SerialPort;
 const State = {
@@ -14,7 +14,7 @@ export class Modem extends EventEmitter {
   static list = Serial.list;
   public serialPort: serialPort.SerialPort<AutoDetectTypes>;
   public activeCommand: string = "";
-  private GPIO: GPIOManager;
+  // private GPIO: GPIOManager;
 
   private state = {
     initial: null,
@@ -29,7 +29,7 @@ export class Modem extends EventEmitter {
     Stream.Stream.call(this);
     this.serialPort = this.setupPort(opts);
 
-    this.GPIO = new GPIOManager();
+    // this.GPIO = new GPIOManager();
   }
 
   setupPort(opts: serialPort.SerialPortOpenOptions<AutoDetectTypes>) {
@@ -57,7 +57,7 @@ export class Modem extends EventEmitter {
 
   async sendAt(command: string, timeout: number) {
     return new Promise<boolean>(async (resolve, reject) => {
-      await this.GPIO.powerOn();
+      // await this.GPIO.powerOn();
       const encodedCommand = this.formatCmd(command);
       console.log("RUNNING: ", encodedCommand);
       this.state.current = State.WRITTING;
@@ -70,8 +70,8 @@ export class Modem extends EventEmitter {
         console.log("MESSAGE RECEIVED!");
         resolve(true);
       });
-      await await sleep(timeout);
-      this.GPIO.powerDown();
+      // await await sleep(timeout);
+      // this.GPIO.powerDown();
     });
   }
 
