@@ -39,8 +39,8 @@ export class Modem extends EventEmitter {
     this.writeable = true;
     this.readable = true;
 
-    serialPort.on("data", this.dataHandler.bind(this, opts.path));
-    serialPort.on("error", this.errorHandler.bind(this, opts.path));
+    serialPort.on("data", this.dataHandler.bind(this));
+    serialPort.on("error", this.errorHandler.bind(this));
     return serialPort;
   }
 
@@ -71,9 +71,7 @@ export class Modem extends EventEmitter {
 
 
 
-  dataHandler(path: string, data: Buffer) {
-    console.log("UNFORMATED: ", formatOutput(this.activeCommand), data.toString());
-
+  dataHandler(data: Buffer) {
     console.log("FORMATED: ", formatOutput(this.activeCommand), formatOutput(data.toString()));
 
     const result = this.handleState(
@@ -125,16 +123,10 @@ export class Modem extends EventEmitter {
   }
 
   handleState(state, cmd, code, data) {
-    var obj = {
-      cmd: cmd,
-      code: code,
-      data: data,
-    };
     //+CMGS
     state.previous = state.current;
-    if (!code && data.length) {
+    if (!code) {
       state.current = "DATA_RECEIVING";
-      return { state: state, data: obj };
     } else if (code && cmd) {
       if (cmd.match(/^ATD/i)) {
         switch (code) {
@@ -182,7 +174,7 @@ export class Modem extends EventEmitter {
             state.current = "HANGUP_UNKNOWN";
         }
       }
-      return { state: state, data: obj };
     }
+    return { state, cmd, code, data };
   }
 }
