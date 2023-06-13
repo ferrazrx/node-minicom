@@ -5,5 +5,9 @@
 ```
 npm i node-minicom-raspberry-pi --save
 ```
+# Install SoX
 
-## Minicom module for controlling modems
+```
+sudo apt-get install -y sox
+sudo apt-get install -y socat
+```

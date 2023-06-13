@@ -2,7 +2,7 @@ import { Data, Modem } from "./src/modem";
 
 type Port = Omit<
   InternalPort,
-  "modem" | "callPhoneNumber" | "sendShortMessage"
+  "modem" | "callPhoneNumber" | "sendShortMessage" | "audioMessage"
 >;
 type Ports = {
   [path: string]: InternalPort;
@@ -30,6 +30,11 @@ export class InternalPort {
     const cmd = `ATD${this.phone};`;
     const result = await this.modem.writeRaw(cmd);
     return result;
+  }
+
+  async audioMessage(){
+    const cmd = `AT+CPCMREG=1`;
+    await this.modem.writeRaw(cmd);
   }
 
   //TODO:
