@@ -76,7 +76,6 @@ export class Modem extends EventEmitter {
     const data = formatOutput(buffer)
 
     if(!data || data === "") return;
-    console.log("DATA", data)
     const result = this.handleState(
       this.state,
       formatOutput(this.activeCommand),
@@ -114,9 +113,9 @@ export class Modem extends EventEmitter {
   handleState(state, cmd, code) {
     //+CMGS
     state.previous = state.current;
-    if (!code && !cmd) {
+    if (code === '' && cmd === '') {
       state.current = "DATA_RECEIVING";
-    } else if (code && cmd) {
+    } else {
       if(cmd.match(/^AT\+CMGF/)){
         switch (code) {
           case "OK":
@@ -128,6 +127,7 @@ export class Modem extends EventEmitter {
         }
       }
 
+      console.log(cmd, cmd.match(/^\+CMGS/))
       if(cmd.match(/^\+CMGS/)){
         switch (code) {
           case "OK":
