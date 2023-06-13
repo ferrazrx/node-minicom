@@ -54,7 +54,6 @@ export class Modem extends EventEmitter {
   }
 
   async writeRaw(command: string, shouldFormat: boolean = true) {
-
     return new Promise<boolean>(async (resolve, reject) => {
     const formattedCommand = shouldFormat ? this.formatCmd(command) : command;
     this.activeCommand += command;
@@ -74,13 +73,18 @@ export class Modem extends EventEmitter {
 
   dataHandler(buffer: string) {
     const data = formatOutput(buffer)
+    const cmd = formatOutput(this.activeCommand)
 
+    // Return if empty line or Ok line without command
     if(!data || data === "") return;
+    if(cmd === '' && data === "OK") return;
+
     const result = this.handleState(
       this.state,
-      formatOutput(this.activeCommand),
+      cmd,
       data,
     );
+   
     this.activeCommand = ''
     this.write(result);
   }
@@ -111,7 +115,6 @@ export class Modem extends EventEmitter {
   }
 
   handleState(state, cmd, code) {
-    //+CMGS
     state.previous = state.current;
     if (code === '' && cmd === '') {
       state.current = "DATA_RECEIVING";
