@@ -11,7 +11,7 @@ const State = {
 } as const;
 
 const formatOutput = (string: string)=> {
-  return string.replace(/(\r\n|\n|\r|[0-9]|>)/gm, "")
+  return string.replace(/(\r\n|\n|\r|[0-9]|>|:)/gm, "").trim()
 }
 
 export class Modem extends EventEmitter {
@@ -52,9 +52,9 @@ export class Modem extends EventEmitter {
     return result;
   }
 
-  async writeRaw(command: string) {
+  async writeRaw(command: string, shouldFormat: boolean = true) {
     return new Promise<boolean>(async (resolve, reject) => {
-    const formattedCommand = this.formatCmd(command);
+    const formattedCommand = shouldFormat ? this.formatCmd(command) : command;
     this.activeCommand = formattedCommand;
     this.state.previous = this.state.current;
     this.state.current = State.WRITTING;
@@ -72,7 +72,9 @@ export class Modem extends EventEmitter {
 
 
   dataHandler(path: string, data: Buffer) {
-    console.log(formatOutput(this.activeCommand), formatOutput(data.toString()));
+    console.log("UNFORMATED: ", formatOutput(this.activeCommand), data.toString());
+
+    console.log("FORMATED: ", formatOutput(this.activeCommand), formatOutput(data.toString()));
 
     const result = this.handleState(
       this.state,
