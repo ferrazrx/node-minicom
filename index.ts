@@ -50,8 +50,10 @@ export class InternalPort {
       onData && this.modem.on('data', onData)
       onError && this.modem.on('error', onError)
       
+      await this.modem.writeRaw('AT+CLVL =?')
+      
       if(await this.modem.writeRaw("AT+CMGF=1")){
-  
+        
         if(await this.modem.writeRaw('AT+CMGS="' + this.phone + '"')){
           this.modem.writeRaw("", false);
           this.modem.writeRaw(text, false);
