@@ -1,4 +1,4 @@
-import {SerialPort, ReadlineParser, SerialPortOpenOptions, DelimiterParser} from "serialport";
+import {SerialPort, SerialPortOpenOptions, ReadlineParser} from "serialport";
 import { EventEmitter } from "events";
 import Stream from "stream";
 import { AutoDetectTypes } from "@serialport/bindings-cpp";
@@ -35,7 +35,7 @@ export class Modem extends EventEmitter {
 
   setupPort(opts: SerialPortOpenOptions<AutoDetectTypes>) {
     const serialPort = new Serial(opts);
-    const parser = serialPort.pipe(new DelimiterParser({ delimiter: '\n' }))
+    const parser = serialPort.pipe(new ReadlineParser({ delimiter: '\r\n' }))
     this.state.initial = State.CREATED;
     this.writeable = true;
     this.readable = true;
