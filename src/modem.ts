@@ -127,18 +127,6 @@ export class Modem extends EventEmitter {
         }
       }
 
-      console.log(cmd, cmd.match(/^\+CMGS/))
-      if(cmd.match(/^\+CMGS/)){
-        switch (code) {
-          case "OK":
-            state.current = "MESSAGE_SENT";
-            break;
-          default:
-            state.current = "MESSAGE_NOT_SENT";
-            break
-        }
-      }
-
       if (cmd.match(/^ATD/i)) {
         switch (code) {
           case "OK":
@@ -184,6 +172,10 @@ export class Modem extends EventEmitter {
           default:
             state.current = "HANGUP_UNKNOWN";
         }
+      }
+
+      if(code.match(/^\+CMGS/)){
+        state.current = "MESSAGE_SENT";
       }
     }
     return { state, cmd, code };
