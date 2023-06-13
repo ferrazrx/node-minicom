@@ -10,7 +10,9 @@ const port = minicom.addPort({
 
 port.callPhoneNumber({
   onData: (data)=> {
+    console.log(data)
     if(data.code === 'VOICE CALL: BEGIN'){
+      console.log("TRYING TO PLAY...")
       port.audioMessage()
     }
   },
