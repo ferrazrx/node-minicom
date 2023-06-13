@@ -124,7 +124,7 @@ export class Modem extends EventEmitter {
         }
       }
 
-      if(cmd.match(/^+CMGS/i)){
+      if(cmd.match(/^\+CMGS/i)){
         switch (code) {
           case "OK":
             state.current = "MESSAGE_SENT";
