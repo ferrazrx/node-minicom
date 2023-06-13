@@ -9,6 +9,10 @@ const State = {
   WRITTING: "WRITTING",
   IDLE: "IDLE",
 } as const;
+
+const formatOutput = (string: string)=> {
+  return string.replace(/(\r\n|\n|\r)/gm, "")
+}
 export class Modem extends EventEmitter {
   static list = Serial.list;
   public serialPort: serialPort.SerialPort<AutoDetectTypes>;
@@ -39,12 +43,21 @@ export class Modem extends EventEmitter {
     return serialPort;
   }
 
+  formatCmd(str: string) {
+    let result = str;
+    const end = "\r\n";
+    str.trim();
+    if (!str.match(/[\r\n]+$/)) result = result + end;
+    return result;
+  }
+
   async writeRaw(command: string) {
     return new Promise<boolean>(async (resolve, reject) => {
-    this.activeCommand = command;
+    const formattedCommand = this.formatCmd(command);
+    this.activeCommand = formattedCommand;
     this.state.previous = this.state.current;
     this.state.current = State.WRITTING;
-    this.serialPort.write(command, (error)=>{
+    this.serialPort.write(formattedCommand, (error)=>{
       this.state.current = State.IDLE;
       if (error) {
         console.error(error);
@@ -55,14 +68,16 @@ export class Modem extends EventEmitter {
     })
   }
 
+
+
   dataHandler(path: string, data: Buffer) {
-    console.log(this.activeCommand.trim(), data.toString().trim());
+    console.log(formatOutput(this.activeCommand), formatOutput(data.toString()));
 
     const result = this.handleState(
       this.state,
-      this.activeCommand.trim(),
-      data.toString().trim(),
-      data.toString().trim()
+      formatOutput(this.activeCommand),
+      formatOutput(data.toString()),
+      formatOutput(data.toString())
     );
     console.log(result);
     /*  if (data.code) {
