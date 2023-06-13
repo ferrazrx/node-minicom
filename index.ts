@@ -37,24 +37,6 @@ export class InternalPort {
     await this.modem.writeRaw(cmd);
   }
 
-  //TODO:
-  // def ReceiveShortMessage():
-  // 	rec_buff = ''
-  // 	console.log('Setting SMS mode...')
-  // 	send_at('AT+CMGF=1','OK',1)
-  // 	send_at('AT+CPMS=\"SM\",\"SM\",\"SM\"', 'OK', 1)
-  // 	answer = send_at('AT+CMGR=1','+CMGR:',2)
-  // 	if 1 == answer:
-  // 		answer = 0
-  // 		if 'OK' in rec_buff:
-  // 			answer = 1
-  // 			console.log(rec_buff)
-  // 	else:
-  // 		console.log('error%d'%answer)
-  // 		return False
-  // 	return True
-  // }
-
   async sendShortMessage({
     text,
     onData,
@@ -67,11 +49,9 @@ export class InternalPort {
     try{
       onData && this.modem.on('data', onData)
       onError && this.modem.on('error', onError)
-
-      console.log("Setting SMS mode...");
       
       if(await this.modem.writeRaw("AT+CMGF=1")){
-        console.log("Sending Short Message...");
+  
         if(await this.modem.writeRaw('AT+CMGS="' + this.phone + '"')){
           this.modem.writeRaw("", false);
           this.modem.writeRaw(text, false);
