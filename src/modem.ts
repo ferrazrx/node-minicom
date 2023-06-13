@@ -126,12 +126,33 @@ export class Modem extends EventEmitter {
     this.emit("error", { error: e, path });
   }
 
-  handleState(state, cmd, code, data) {
+  handleState(state, cmd, code) {
     //+CMGS
     state.previous = state.current;
-    if (!code) {
+    if (!code && !cmd) {
       state.current = "DATA_RECEIVING";
     } else if (code && cmd) {
+      if(cmd.match(/^AT+CMGF/i)){
+        switch (code) {
+          case "OK":
+            state.current = "MESSAGE_ACKNOWLEDGED";
+            break;
+          default:
+            state.current = "MESSAGE_NOT_ACKNOWLEDGED";
+            break
+        }
+      }
+
+      if(cmd.match(/^+CMGS/i)){
+        switch (code) {
+          case "OK":
+            state.current = "MESSAGE_SENT";
+            break;
+          default:
+            state.current = "MESSAGE_NOT_SENT";
+            break
+        }
+      }
       if (cmd.match(/^ATD/i)) {
         switch (code) {
           case "OK":
@@ -179,6 +200,6 @@ export class Modem extends EventEmitter {
         }
       }
     }
-    return { state, cmd, code, data };
+    return { state, cmd, code };
   }
 }
