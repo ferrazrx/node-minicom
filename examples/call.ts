@@ -8,19 +8,7 @@ const port = minicom.addPort({
   phone: "19022203567",
 });
 
-const call = async () => {
-  port
-    .callPhoneNumber()
-    .then((e) => {
-      if (e) {
-        console.log("MESSAGE RECEIVED!");
-        port.modem.on("call", (data) => console.log(data));
-        port.modem.on("data", (data) => console.log(data));
-      }
-    })
-    .catch((e) => {
-      console.log("Something went wrong! Please try again");
-    });
-};
-
-call();
+port.callPhoneNumber({
+  onData: (data)=> console.log(data),
+  onError: (e)=> console.log(e) 
+})

@@ -17,7 +17,16 @@ export class InternalPort {
     public type?: string
   ) {}
 
-  async callPhoneNumber() {
+  async callPhoneNumber({
+    onData,
+    onError 
+  }:{
+    onData?: (data: Data)=> void,
+    onError?: (e: Error)=> void,
+  }) {
+    onData && this.modem.on('data', onData)
+    onError && this.modem.on('error', onError)
+
     const cmd = `ATD${this.phone};`;
     const result = await this.modem.writeRaw(cmd);
     return result;
