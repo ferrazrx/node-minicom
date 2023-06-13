@@ -4,11 +4,42 @@ import Stream from "stream";
 import { AutoDetectTypes } from "@serialport/bindings-cpp";
 
 const Serial = SerialPort;
-const State = {
+const States = {
   CREATED: "CREATED",
   WRITTING: "WRITTING",
   IDLE: "IDLE",
+  MESSAGE_ACKNOWLEDGED: "MESSAGE_ACKNOWLEDGED",
+  MESSAGE_NOT_ACKNOWLEDGED: 'MESSAGE_NOT_ACKNOWLEDGED',
+  MESSAGE_SENT: "MESSAGE_SENT",
+  CALL_CALLING: "CALL_CALLING",
+  CALL_RINGING: "CALL_RINGING",
+  CALL_CONNECTED: "CALL_CONNECTED",
+  CALL_FAILED: "CALL_FAILED",
+  CALL_NO_LINE: "CALL_NO_LINE",
+  CALL_BUSY: "CALL_BUSY",
+  CALL_UNKNOWN: "CALL_UNKNOWN",
+  ANSWER_SUCCESS:  "ANSWER_SUCCESS",
+  ANSWER_FAILED: "ANSWER_FAILED",
+  ANSWER_UNKNOWN: "ANSWER_UNKNOWN",
+  HANGUP_SUCCESS: "HANGUP_SUCCESS",
+  HANGUP_FAILED: "HANGUP_FAILED",
+  HANGUP_UNKNOWN: "HANGUP_UNKNOWN",
+
 } as const;
+
+type State = typeof States[keyof typeof States];
+
+type ModemSTate = {
+  initial: State | null,
+  current: State | null,
+  previous: State | null,
+};
+
+export type Data = {
+  state: ModemSTate;
+  cmd: string;
+  code: string;
+}
 
 const formatOutput = (string: string)=> {
   return string.replace(/(\r\n|\n|\r|>)/gm, "").trim()
@@ -19,11 +50,11 @@ export class Modem extends EventEmitter {
   public serialPort: SerialPort<AutoDetectTypes>;
   public activeCommand: string = "";
 
-  private state = {
+  private state: ModemSTate = {
     initial: null,
     current: null,
-    previous: null,
-  };
+    previous: null
+  }
   writeable: boolean = false;
   readable: boolean = false;
 
@@ -36,7 +67,7 @@ export class Modem extends EventEmitter {
   setupPort(opts: SerialPortOpenOptions<AutoDetectTypes>) {
     const serialPort = new Serial(opts);
     const parser = serialPort.pipe(new ReadlineParser({ delimiter: '\r\n' }))
-    this.state.initial = State.CREATED;
+    this.state.initial = States.CREATED;
     this.writeable = true;
     this.readable = true;
 
@@ -58,9 +89,9 @@ export class Modem extends EventEmitter {
     const formattedCommand = shouldFormat ? this.formatCmd(command) : command;
     this.activeCommand += command;
     this.state.previous = this.state.current;
-    this.state.current = State.WRITTING;
+    this.state.current = States.WRITTING;
     this.serialPort.write(formattedCommand, (error)=>{
-      this.state.current = State.IDLE;
+      this.state.current = States.IDLE;
    
       resolve(true);
       if (error) {
@@ -108,79 +139,78 @@ export class Modem extends EventEmitter {
     this.close();
   }
 
-  errorHandler(path, err: unknown) {
+  errorHandler(path: string, err: unknown) {
     console.log("Modem error: ", err);
     const e = new Error(path + " has failed to load: " + err);
     this.emit("error", { error: e, path });
   }
 
-  handleState(state, cmd, code) {
+  handleState(state: ModemSTate, cmd: string, code: string) {
     state.previous = state.current;
-    if (code === '' && cmd === '') {
-      state.current = "DATA_RECEIVING";
-    } else {
+
       if(cmd.match(/^AT\+CMGF/)){
         switch (code) {
           case "OK":
-            state.current = "MESSAGE_ACKNOWLEDGED";
+            state.current = States.MESSAGE_ACKNOWLEDGED;
             break;
           default:
-            state.current = "MESSAGE_NOT_ACKNOWLEDGED";
+            state.current = States.MESSAGE_NOT_ACKNOWLEDGED;
             break
         }
       }
 
+      
       if (cmd.match(/^ATD/i)) {
         switch (code) {
           case "OK":
-            state.current = "CALL_CALLING";
+            state.current = States.CALL_CALLING;
             break;
           case "RING":
-            state.current = "CALL_RINGING";
+            state.current = States.CALL_RINGING;
             break;
           case "CONNECT":
-            state.current = "CALL_CONNECTED";
+            state.current = States.CALL_CONNECTED;
             break;
           case "ERROR":
-            state.current = "CALL_FAILED";
+            state.current = States.CALL_FAILED;
             break;
           case "NO CARRIER":
-            state.current = "CALL_NO_LINE";
+            state.current = States.CALL_NO_LINE;
             break;
           case "BUSY":
-            state.current = "CALL_BUSY";
+            state.current = States.CALL_BUSY;
             break;
           default:
-            state.current = "CALL_UNKNOWN";
+            state.current = States.CALL_UNKNOWN;
         }
       } else if (cmd.match(/^ATA/i)) {
         switch (code) {
           case "OK":
-            state.current = "ANSWER_SUCCESS";
+            state.current = States.ANSWER_SUCCESS;
             break;
           case "ERROR":
-            state.current = "ANSWER_FAILED";
+            state.current = States.ANSWER_FAILED;
             break;
           default:
-            state.current = "ANSWER_UNKNOWN";
+            state.current = States.ANSWER_UNKNOWN;
         }
       } else if (cmd.match(/^ATH/i)) {
         switch (code) {
           case "OK":
-            state.current = "HANGUP_SUCCESS";
+            state.current = States.HANGUP_SUCCESS;
             break;
           case "ERROR":
-            state.current = "HANGUP_FAILED";
+            state.current = States.HANGUP_FAILED;
             break;
           default:
-            state.current = "HANGUP_UNKNOWN";
+            state.current = States.HANGUP_UNKNOWN;
         }
       }
 
       if(code.match(/^\+CMGS/)){
-        state.current = "MESSAGE_SENT";
+        state.current = States.MESSAGE_SENT;
       }
-    }
+    
     return { state, cmd, code };
   }
 }

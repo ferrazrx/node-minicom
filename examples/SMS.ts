@@ -8,8 +8,10 @@ const port = minicom.addPort({
   phone: "19022203567",
 });
 
-
-port.modem.on("data", (data) => console.log(data))
-port.sendShortMessage("TEST 01")
+port.sendShortMessage({
+  text: "TEST 01",
+  onData: (data)=> console.log(data),
+  onError: (e)=> console.log(e)
+})
 
 

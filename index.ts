@@ -1,4 +1,4 @@
-import { Modem } from "./src/modem";
+import { Data, Modem } from "./src/modem";
 
 type Port = Omit<
   InternalPort,
@@ -41,15 +41,26 @@ export class InternalPort {
   // 	return True
   // }
 
-  async sendShortMessage(textMessage: string): Promise<boolean> {
+  async sendShortMessage({
+    text,
+    onData,
+    onError 
+  }:{
+    text: string,
+    onData?: (data: Data)=> void,
+    onError?: (e: Error)=> void,
+  }) {
     try{
+      onData && this.modem.on('data', onData)
+      onError && this.modem.on('error', onError)
+
       console.log("Setting SMS mode...");
       
       if(await this.modem.writeRaw("AT+CMGF=1")){
         console.log("Sending Short Message...");
         if(await this.modem.writeRaw('AT+CMGS="' + this.phone + '"')){
           this.modem.writeRaw("", false);
-          this.modem.writeRaw(textMessage, false);
+          this.modem.writeRaw(text, false);
           this.modem.writeRaw("\x1A", false);
           return true
         }else{
