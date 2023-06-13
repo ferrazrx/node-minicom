@@ -53,14 +53,15 @@ export class Modem extends EventEmitter {
   }
 
   async writeRaw(command: string, shouldFormat: boolean = true) {
+
     return new Promise<boolean>(async (resolve, reject) => {
     const formattedCommand = shouldFormat ? this.formatCmd(command) : command;
-
+    this.activeCommand = command;
     this.state.previous = this.state.current;
     this.state.current = State.WRITTING;
     this.serialPort.write(formattedCommand, (error)=>{
       this.state.current = State.IDLE;
-      this.activeCommand = command;
+   
       resolve(true);
       if (error) {
         console.error(error);
