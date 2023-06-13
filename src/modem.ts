@@ -56,6 +56,7 @@ export class Modem extends EventEmitter {
 
     return new Promise<boolean>(async (resolve, reject) => {
     const formattedCommand = shouldFormat ? this.formatCmd(command) : command;
+    console.log("CMD::::", command)
     this.activeCommand = command;
     this.state.previous = this.state.current;
     this.state.current = State.WRITTING;
